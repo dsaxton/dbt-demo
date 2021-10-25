@@ -1,0 +1,7 @@
+.env
+venv/
+clean_containers.sh
+clean_images.sh
+target/
+dbt_modules/
+logs/
