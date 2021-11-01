@@ -7,3 +7,4 @@ dbt_modules/
 logs/
 *.md
 *.html
+*.js
