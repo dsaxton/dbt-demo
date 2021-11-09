@@ -5,6 +5,3 @@ clean_images.sh
 target/
 dbt_modules/
 logs/
-*.md
-*.html
-*.js

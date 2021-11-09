@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style type="text/css">
+        @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+        @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+        @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+        body {
+            font-family: 'Droid Serif';
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Yanone Kaffeesatz';
+            font-weight: normal;
+        }
+
+        .remark-code,
+        .remark-inline-code {
+            font-family: 'Ubuntu Mono';
+        }
+    </style>
+</head>
+
+<body>
+    <textarea id="source">
+layout: true
+class: middle, inverse
+---
+# Declarative Data Pipelines with dbt
+
+```shell
+├── analysis
+├── data
+├── dbt_project.yml
+├── macros
+├── models
+│   └── example
+│       ├── my_first_dbt_model.sql
+│       ├── my_second_dbt_model.sql
+│       └── schema.yml
+├── README.md
+├── snapshots
+└── tests
+```
+
+---
+
+# Overview
+
+- CLI for simplifying in-database transformation pipelines
+- Relies primarily on select statements
+- First class support for data tests
+- Macro system for extensibility
+- Primary commands:
+  - dbt run
+  - dbt test
+- https://github.com/dbt-labs
+
+---
+
+# Sample project structure
+
+https://github.com/dsaxton/dbt-demo
+
+```shell
+├── dbt-demo
+│   ├── dbt_project.yml
+│   ├── macros
+│   ├── models
+│   │   ├── employee_dependents.sql
+│   │   ├── salary_by_department.sql
+│   │   └── schema.yml
+│   └── tests
+│       └── salary_fields_are_monotone.sql
+└── profiles.yml
+```
+
+---
+
+# profiles.yml
+
+```yaml
+dbt_demo:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('PGHOST') }}"
+      user: "{{ env_var('PGUSER') }}"
+      password: "{{ env_var('PGPASSWORD') }}"
+      port: 5432
+      dbname: "{{ env_var('PGDATABASENAME') }}"
+      schema: public
+      threads: 4
+```
+
+---
+
+# dbt_project.yml
+
+```yaml
+name: "dbt_demo"
+version: "0.1.0"
+config-version: 2
+
+profile: "dbt_demo"
+
+source-paths: ["models"]
+analysis-paths: ["analysis"]
+test-paths: ["tests"]
+data-paths: ["data"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+    - "target"
+    - "dbt_modules"
+
+models:
+  dbt_demo:
+      employee:
+          materialized: view
+```
+
+---
+
+# schema.yml
+
+```yaml
+version: 2
+
+models:
+  - name: salary_by_department
+    columns:
+      - name: department_name
+        tests:
+          - unique
+          - not_null
+  - name: employee_dependents
+    columns:
+      - name: employee_id
+        tests:
+          - unique
+          - not_null
+```
+
+---
+
+# Transformations are select statements
+
+`/models/salary_by_department.sql`
+
+```sql
+{{ config(materialized="view") }}
+
+select
+    departments.department_name,
+    count(1) as employee_count,
+    min(employees.salary) as min_salary,
+    max(employees.salary) as max_salary,
+    sum(employees.salary) as sum_salary
+from employees
+left join departments
+    on employees.department_id = departments.department_id
+group by departments.department_name
+order by departments.department_name
+```
+
+---
+
+# Pipelines are declarative
+
+- Dependencies expressed using the `ref` function
+- Intuitive and less error-prone compared to sequential SQL
+
+`/models/unwrapped.sql`
+
+```sql
+select
+    json_array_elements(array_data) as unwrapped
+from some_table
+```
+
+`/models/flattened.sql`
+
+```sql
+select
+    unwrapped->>'field_1' as field_1,
+    unwrapped->>'field_2' as field_2,
+    unwrapped->>'field_3' as field_3,
+    unwrapped->>'field_4' as field_4,
+from {{ ref("unwrapped") }}
+```
+
+---
+
+# First class testing support
+
+- Built-in data tests that are easy to write
+  - Bespoke
+  - Generic
+- Works well with CI/CD systems (translate data correctness issues into build failures)
+
+---
+
+# Bespoke tests
+
+`/tests/salary_fields_are_monotone.sql`
+
+```sql
+select *
+from {{ ref("salary_by_department") }}
+where not (min_salary <= max_salary and max_salary <= sum_salary)
+```
+
+`/tests/some_table_is_not_empty.sql`
+
+```sql
+select *
+from (select count(1) as c from some_table) as t
+where c = 0
+```
+
+---
+
+# Test macros
+
+`/macros/model_is_not_empty.sql`
+
+```sql
+{% test not_empty(model) %}
+    select *
+    from (select count(1) as c from {{ model }}) as t
+    where c = 0
+{% endtest %}
+```
+
+Then use within any model config YAML:
+
+```yaml
+---
+version: 2
+
+models:
+  - name: some_table
+    tests:
+      - not_empty
+```
+
+---
+
+# Downsides
+
+- More than one way to perform data tests (flexible but also confusing)
+  - Start with bespoke tests and parametrize early
+- Not always easy to express test assertions as select statements
+- Source data can only be tested using bespoke tests
+  - Create thin model wrapper as a workaround
+- Macro capabilities may lead to spaghetti code
+- Somewhat clumsy abstractions: properties vs. configuration vs. schema
+
+---
+
+# Closing thoughts
+
+- Opportunity to develop competing tools
+- Additional resources:
+  - https://github.com/dbt-labs/dbt-utils
+  - https://about.gitlab.com/handbook/business-technology/data-team/platform/dbt-guide/
+    </textarea>
+    <script src="remark.min.js">
+    </script>
+    <script>
+        var slideshow = remark.create();
+    </script>
+</body>
+
+</html>
