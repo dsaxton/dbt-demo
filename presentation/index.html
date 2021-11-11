@@ -168,6 +168,15 @@ order by departments.department_name
 
 ---
 
+# Materialization options
+
+- view: logical structure
+- table: physical data, dropped and recreated on every run
+- incremental: physical data, allows appending new rows
+- ephemeral: defines a common table expression
+
+---
+
 # Pipelines are declarative
 
 - Dependencies expressed using the `ref` function
