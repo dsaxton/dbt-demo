@@ -11,10 +11,9 @@ RUN pip3 install cffi \
 COPY profiles.yml /root/.dbt/
 COPY dbt-demo /root/dbt-demo/
 COPY build.sql build_tables.sh /root/
-COPY connect_postgres.sh helper.sh /root/dbt-demo/
+COPY connect_postgres.sh /root/dbt-demo/
 RUN chmod +x \
     /root/dbt-demo/connect_postgres.sh \
-    /root/dbt-demo/helper.sh \
     /root/build_tables.sh \
     && /etc/init.d/postgresql start
 
