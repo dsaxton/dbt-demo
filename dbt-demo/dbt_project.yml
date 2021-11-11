@@ -15,8 +15,3 @@ target-path: "target"
 clean-targets:
     - "target"
     - "dbt_modules"
-
-models:
-  dbt_demo:
-      employee:
-          materialized: view

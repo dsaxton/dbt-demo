@@ -120,11 +120,6 @@ target-path: "target"
 clean-targets:
     - "target"
     - "dbt_modules"
-
-models:
-  dbt_demo:
-      employee:
-          materialized: view
 ```
 
 ---
@@ -254,6 +249,69 @@ models:
 
 ---
 
+# dbt compile
+
+```shell
+Running with dbt=0.21.0
+Found 2 models, 5 tests, 0 snapshots, 0 analyses, 162 macros, 0 operations, 0 seed files, 0 sources, 0 exposures
+
+01:05:56 | Concurrency: 4 threads (target='dev')
+01:05:56 |
+01:05:56 | Done.
+```
+
+---
+
+# dbt run
+
+```shell
+Running with dbt=0.21.0
+Found 2 models, 5 tests, 0 snapshots, 0 analyses, 162 macros, 0 operations, 0 seed files, 0 sources, 0 exposures
+
+00:57:56 | Concurrency: 4 threads (target='dev')
+00:57:56 |
+00:57:56 | 1 of 2 START view model public.employee_dependents................... [RUN]
+00:57:56 | 2 of 2 START view model public.salary_by_department.................. [RUN]
+00:57:57 | 1 of 2 OK created view model public.employee_dependents.............. [CREATE VIEW in 0.73s]
+00:57:57 | 2 of 2 OK created view model public.salary_by_department............. [CREATE VIEW in 0.73s]
+00:57:57 |
+00:57:57 | Finished running 2 view models in 2.88s.
+
+Completed successfully
+
+Done. PASS=2 WARN=0 ERROR=0 SKIP=0 TOTAL=2
+```
+
+---
+
+# dbt test
+
+```shell
+Running with dbt=0.21.0
+Found 2 models, 5 tests, 0 snapshots, 0 analyses, 162 macros, 0 operations, 0 seed files, 0 sources, 0 exposures
+
+00:58:38 | Concurrency: 4 threads (target='dev')
+00:58:38 |
+00:58:38 | 1 of 5 START test not_null_employee_dependents_employee_id........... [RUN]
+00:58:38 | 2 of 5 START test not_null_salary_by_department_department_name...... [RUN]
+00:58:38 | 3 of 5 START test salary_fields_are_monotone......................... [RUN]
+00:58:38 | 4 of 5 START test unique_employee_dependents_employee_id............. [RUN]
+00:58:39 | 4 of 5 PASS unique_employee_dependents_employee_id................... [PASS in 0.53s]
+00:58:39 | 5 of 5 START test unique_salary_by_department_department_name........ [RUN]
+00:58:39 | 3 of 5 PASS salary_fields_are_monotone............................... [PASS in 0.55s]
+00:58:39 | 1 of 5 PASS not_null_employee_dependents_employee_id................. [PASS in 0.56s]
+00:58:39 | 2 of 5 PASS not_null_salary_by_department_department_name............ [PASS in 0.56s]
+00:58:40 | 5 of 5 PASS unique_salary_by_department_department_name.............. [PASS in 0.49s]
+00:58:40 |
+00:58:40 | Finished running 5 tests in 2.27s.
+
+Completed successfully
+
+Done. PASS=5 WARN=0 ERROR=0 SKIP=0 TOTAL=5
+```
+
+---
+
 # Downsides
 
 - More than one way to perform data tests (flexible but also confusing)
@@ -268,6 +326,11 @@ models:
 
 # Closing thoughts
 
+- Related projects:
+  - https://github.com/apache/airflow
+  - https://github.com/PrefectHQ/prefect
+  - https://github.com/sqlfluff/sqlfluff
+  - https://github.com/singer-io
 - Opportunity to develop competing tools
 - Additional resources:
   - https://github.com/dbt-labs/dbt-utils
