@@ -64,13 +64,13 @@ class: middle, inverse
 
 - The database is where computation should be done
 - Pipelines should be declarative
-- Use a syntax developers already know (not another domain specific language)
+- Use a syntax developers already know
 - Eliminate boilerplate and focus on the operations themselves
 - Make it easy (even enjoyable) to test data
 
 ---
 
-# Overview
+# dbt: data build tool
 
 - CLI for simplifying in-database transformation pipelines
 - Syntax focuses on simple select statements
@@ -136,28 +136,6 @@ clean-targets:
 
 ---
 
-# schema.yml
-
-```yaml
-version: 2
-
-models:
-  - name: salary_by_department
-    columns:
-      - name: department_name
-        tests:
-          - unique
-          - not_null
-  - name: employee_dependents
-    columns:
-      - name: employee_id
-        tests:
-          - unique
-          - not_null
-```
-
----
-
 # Transformations are select statements
 
 `/models/salary_by_department.sql`
@@ -197,14 +175,11 @@ order by departments.department_name
 select
     *,
     my_slow_function(my_column)
-
 from raw_app_data.events
 
 {% if is_incremental() %}
-
   -- this filter will only be applied on an incremental run
   where event_time > (select max(event_time) from {{ this }})
-
 {% endif %}
 ```
 
@@ -242,7 +217,7 @@ from {{ ref("unwrapped") }}
   - Bespoke
   - Generic
 - Works well with CI/CD systems (translate data correctness issues into build failures)
-- Similar to pgTAP testing functions:
+- Analogous to pgTAP testing functions:
 
 ```sql
 begin;
@@ -297,6 +272,28 @@ models:
   - name: some_table
     tests:
       - not_empty
+```
+
+---
+
+# Tests in configuration files
+
+```yaml
+version: 2
+
+models:
+  - name: salary_by_department
+    columns:
+      - name: department_name
+        tests:
+          - unique
+          - not_null
+  - name: employee_dependents
+    columns:
+      - name: employee_id
+        tests:
+          - unique
+          - not_null
 ```
 
 ---
@@ -389,9 +386,18 @@ where c = 0
 
 ---
 
-# Macro vs. raw
+# Raw vs. templated SQL
 
-Templated
+```sql
+select
+    order_id,
+    sum(case when payment_method = 'bank_transfer' then amount end) as bank_transfer_amount,
+    sum(case when payment_method = 'credit_card' then amount end) as credit_card_amount,
+    sum(case when payment_method = 'gift_card' then amount end) as gift_card_amount,
+    sum(amount) as total_amount
+from app_data.payments
+group by 1
+```
 
 ```sql
 {% set payment_methods = ["bank_transfer", "credit_card", "gift_card"] %}
@@ -401,19 +407,6 @@ select
     {% for payment_method in payment_methods %}
     sum(case when payment_method = '{{payment_method}}' then amount end) as {{payment_method}}_amount,
     {% endfor %}
-    sum(amount) as total_amount
-from app_data.payments
-group by 1
-```
-
-Raw
-
-```sql
-select
-    order_id,
-    sum(case when payment_method = 'bank_transfer' then amount end) as bank_transfer_amount,
-    sum(case when payment_method = 'credit_card' then amount end) as credit_card_amount,
-    sum(case when payment_method = 'gift_card' then amount end) as gift_card_amount,
     sum(amount) as total_amount
 from app_data.payments
 group by 1
