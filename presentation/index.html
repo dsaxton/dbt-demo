@@ -82,6 +82,7 @@ class: middle, inverse
 # dbt: data build tool
 
 - CLI for simplifying in-database transformation pipelines
+- DBMS agnostic
 - Syntax emphasizes simple select statements
 - First class support for data tests
 - Macro system for extensibility and code reuse
@@ -312,7 +313,7 @@ models:
 
 # dbt compile
 
-Turns templated SQL into actual SQL, reports compilation errors (does not perform any queries)
+Turns templated SQL into raw SQL, reports compilation errors (does not perform any queries)
 
 ```shell
 Running with dbt=0.21.0
@@ -392,7 +393,7 @@ from (select count(1) as c from some_table) as t
 where c = 0
 ```
 
-- Source data can only be tested using bespoke tests
+- Unclear how to test source data using macros
   - Create thin model wrapper as a workaround
 - Macros are deviations from vanilla SQL
 
