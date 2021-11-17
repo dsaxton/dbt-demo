@@ -56,17 +56,23 @@ class: middle, inverse
 - Orchestrating SQL is hard
 - Lots of boilerplate and order dependencies
 - Sequential SQL not the ideal mental model for data transformations
-- Data should be tested
 
 ---
 
 # Basic philosophy
 
-- The database is where computation should be done
 - Pipelines should be declarative
 - Use a syntax developers already know
 - Eliminate boilerplate and focus on the operations themselves
 - Make it easy (even enjoyable) to test data
+
+---
+
+# ETL vs. ELT
+
+- Extract, load, and transform
+- The database as a powerful compute engine
+- Separation of concerns, load data using general purpose languages
 
 ---
 
@@ -213,6 +219,7 @@ from {{ ref("unwrapped") }}
 
 # First class testing support
 
+- Select statements that return invalid data
 - Built-in data tests that are easy to write
   - Bespoke
   - Generic
@@ -396,7 +403,7 @@ select
     sum(case when payment_method = 'gift_card' then amount end) as gift_card_amount,
     sum(amount) as total_amount
 from app_data.payments
-group by 1
+group by order_id
 ```
 
 ```sql
@@ -409,7 +416,7 @@ select
     {% endfor %}
     sum(amount) as total_amount
 from app_data.payments
-group by 1
+group by order_id
 ```
 
 ---
