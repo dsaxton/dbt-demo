@@ -53,7 +53,7 @@ class: middle, inverse
 
 # Motivation
 
-- Orchestrating SQL is hard
+- Orchestrating SQL is difficult
 - Lots of boilerplate and order dependencies
 - Sequential SQL not the ideal mental model for data transformations
 
@@ -62,9 +62,9 @@ class: middle, inverse
 # Basic philosophy
 
 - Pipelines should be declarative
-- Use a syntax developers already know
+- Use syntax developers already know
 - Eliminate boilerplate and focus on the operations themselves
-- Make it easy (even enjoyable) to test data
+- Make it easy to test data
 
 ---
 
@@ -72,16 +72,19 @@ class: middle, inverse
 
 - Extract, load, and transform
 - The database as a powerful compute engine
-- Separation of concerns, load data using general purpose languages
+- Separation of concerns
+  - Load data using general purpose languages
+  - Use the database for what it's good at
+  - Easier to reason about and maintain
 
 ---
 
 # dbt: data build tool
 
 - CLI for simplifying in-database transformation pipelines
-- Syntax focuses on simple select statements
+- Syntax emphasizes simple select statements
 - First class support for data tests
-- Macro system for extensibility
+- Macro system for extensibility and code reuse
 
 ---
 
