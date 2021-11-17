@@ -145,7 +145,7 @@ clean-targets:
 
 ---
 
-# Transformations are select statements
+# Transformations as select statements
 
 `/models/salary_by_department.sql`
 
@@ -171,8 +171,8 @@ order by departments.department_name
 
 - view: logical structure
 - table: physical data, dropped and recreated on every run
-- ephemeral: defines a common table expression
 - incremental: physical data, allows appending new rows
+- ephemeral: defines a common table expression
 
 ---
 
@@ -223,7 +223,7 @@ from {{ ref("unwrapped") }}
 # First class testing support
 
 - Select statements that return invalid data
-- Built-in data tests that are easy to write
+- Two ways of writing tests:
   - Bespoke
   - Generic
 - Works well with CI/CD systems (translate data correctness issues into build failures)
@@ -287,6 +287,8 @@ models:
 ---
 
 # Tests in configuration files
+
+`/models/test_models.yml`
 
 ```yaml
 version: 2
