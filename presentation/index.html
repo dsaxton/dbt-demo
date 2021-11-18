@@ -215,7 +215,7 @@ select
     unwrapped->>'field_1' as field_1,
     unwrapped->>'field_2' as field_2,
     unwrapped->>'field_3' as field_3,
-    unwrapped->>'field_4' as field_4,
+    unwrapped->>'field_4' as field_4
 from {{ ref("unwrapped") }}
 ```
 
